@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fan Speed Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #fan-speed-slider {
+      width: 300px;
+      height: 20px;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fan Speed Control</h1>
+  <input type="range" id="fan-speed-slider" min="0" max="255" value="0" onchange="fanSpeedChanged(this.value)">
+  <script>
+    function fanSpeedChanged(value) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/fanSpeed?value=' + value, true);
+      xhr.send();
+    }
+  </script>
+</body>
+</html>
