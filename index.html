@@ -11,28 +11,89 @@
             padding: 20px;
         }
         input[type="range"] {
+            width: 60%; /* Make the slider smaller */
+            margin: 0 10px; /* Add margin for spacing */
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        .control-buttons {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: center; /* Center the buttons and slider */
+            align-items: center; /* Align vertically */
+            margin-top: 10px;
+        }
+        .gauge {
             width: 80%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            margin: 10px auto;
+            overflow: hidden;
+        }
+        .gauge-fill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0;
+            transition: width 0.3s;
         }
     </style>
 </head>
 <body>
     <h1>Motor Speed Control</h1>
-    <input type="range" id="speedSlider" min="0" max="255" value="0">
-    <p>Speed: <span id="speedValue">0</span></p>
+    
+    <div class="control-buttons">
+        <button id="decreaseSpeed">-</button>
+        <input type="range" id="speedSlider" min="100" max="250" value="100">
+        <button id="increaseSpeed">+</button>
+    </div>
+    
+    <p>Speed: <span id="speedValue">100</span></p>
+    <button id="motorToggle">Turn On</button>
+
+    <h2>Current Consumption (mAh)</h2>
+    <div class="gauge">
+        <div class="gauge-fill" id="gaugeFill"></div>
+    </div>
+    <p id="currentConsumption">0 mAh</p>
 
     <script>
-        const particleAccessToken = '482cbf4fd2dc06ae47382ad61e2fabf3c3030156'; // Replace with your Particle access token
-        const deviceId = '2b004f000e51353532343635'; // Replace with your device ID
+        const particleAccessToken = '482cbf4fd2dc06ae47382ad61e2fabf3c3030156'; // Your Particle access token
+        const deviceId = '2b004f000e51353532343635'; // Your device ID
 
         const speedSlider = document.getElementById('speedSlider');
         const speedValue = document.getElementById('speedValue');
+        const motorToggle = document.getElementById('motorToggle');
+        const increaseSpeed = document.getElementById('increaseSpeed');
+        const decreaseSpeed = document.getElementById('decreaseSpeed');
+        const gaugeFill = document.getElementById('gaugeFill');
+        const currentConsumption = document.getElementById('currentConsumption');
+
+        let motorState = false; // Track the motor state (off by default)
 
         speedSlider.addEventListener('input', updateSpeed);
+        motorToggle.addEventListener('click', toggleMotor);
+        increaseSpeed.addEventListener('click', () => changeSpeed(10)); // Increment by 10
+        decreaseSpeed.addEventListener('click', () => changeSpeed(-10)); // Decrement by 10
 
         function updateSpeed() {
             const speed = speedSlider.value;
             speedValue.textContent = speed;
-            setMotorSpeed(speed);
+            if (motorState) {
+                setMotorSpeed(speed);
+            }
+        }
+
+        function changeSpeed(amount) {
+            let newSpeed = parseInt(speedSlider.value) + amount;
+            // Ensure the new speed is within the range
+            newSpeed = Math.max(100, Math.min(250, newSpeed));
+            speedSlider.value = newSpeed;
+            speedValue.textContent = newSpeed;
+            if (motorState) {
+                setMotorSpeed(newSpeed);
+            }
         }
 
         function setMotorSpeed(speed) {
@@ -45,8 +106,25 @@
                 body: JSON.stringify({ arg: speed })
             })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => {
+                console.log(data);
+                updateGauge(speed); // Update the gauge based on speed
+            })
             .catch(error => console.error('Error:', error));
+        }
+
+        function toggleMotor() {
+            motorState = !motorState; // Toggle the state
+            motorToggle.textContent = motorState ? 'Turn Off' : 'Turn On';
+            setMotorSpeed(motorState ? speedSlider.value : 0); // Set speed to 0 if turning off
+        }
+
+        function updateGauge(speed) {
+            // Simulate current consumption based on speed
+            const consumption = speed; // You can customize this logic
+            currentConsumption.textContent = `${consumption} mAh`;
+            const gaugePercentage = (consumption - 100) / (250 - 100) * 100; // Calculate percentage
+            gaugeFill.style.width = `${gaugePercentage}%`; // Update gauge fill
         }
     </script>
 </body>
