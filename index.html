@@ -1,7 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motor Speed Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        input[type="range"] {
+            width: 80%;
+        }
+    </style>
 </head>
 <body>
     <h1>Motor Speed Control</h1>
@@ -9,22 +21,28 @@
     <p>Speed: <span id="speedValue">0</span></p>
 
     <script>
-        const slider = document.getElementById('speedSlider');
-        const speedValueDisplay = document.getElementById('speedValue');
+        const particleAccessToken = '482cbf4fd2dc06ae47382ad61e2fabf3c3030156'; // Replace with your Particle access token
+        const deviceId = '2b004f000e51353532343635'; // Replace with your device ID
 
-        slider.addEventListener('input', function() {
-            speedValueDisplay.textContent = this.value;
-            setMotorSpeed(this.value);
-        });
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+
+        speedSlider.addEventListener('input', updateSpeed);
+
+        function updateSpeed() {
+            const speed = speedSlider.value;
+            speedValue.textContent = speed;
+            setMotorSpeed(speed);
+        }
 
         function setMotorSpeed(speed) {
-            fetch(`https://api.particle.io/v1/devices/2b004f000e51353532343635
-/setSpeed?access_token=87455dc37bc39eeb81e8d1668d3534775a577583`, {
+            fetch(`https://api.particle.io/v1/devices/${deviceId}/setSpeed`, {
                 method: 'POST',
-                body: JSON.stringify({ args: speed }),
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${particleAccessToken}`
+                },
+                body: JSON.stringify({ arg: speed })
             })
             .then(response => response.json())
             .then(data => console.log(data))
