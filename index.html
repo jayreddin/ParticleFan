@@ -1,55 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motor Speed Control</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        input[type="range"] {
-            width: 80%;
-            margin: 20px 0;
-        }
-    </style>
-    <script>
-        async function setMotorSpeed(speed) {
-            const response = await fetch(`https://2b004f000e51353532343635.cloud.particle.io/v1/devices/2b004f000e51353532343635/setSpeed`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': 'Bearer 27b7363be51d9144d868e2e9ee904430d96f993e'
-                },
-                body: `args=${speed}`
-            });
-            const data = await response.json();
-            console.log('Motor speed set to:', data.return_value);
-        }
-
-        function updateSpeed(slider) {
-            const speedValue = slider.value;
-            setMotorSpeed(speedValue);
-        }
-    </script>
 </head>
 <body>
     <h1>Motor Speed Control</h1>
-    <input type="range" min="0" max="255" value="0" oninput="updateSpeed(this)">
+    <input type="range" id="speedSlider" min="0" max="255" value="0">
     <p>Speed: <span id="speedValue">0</span></p>
 
     <script>
-        const slider = document.querySelector('input[type="range"]');
-        const speedValue = document.getElementById('speedValue');
-        slider.addEventListener('input', () => {
-            speedValue.textContent = slider.value;
+        const slider = document.getElementById('speedSlider');
+        const speedValueDisplay = document.getElementById('speedValue');
+
+        slider.addEventListener('input', function() {
+            speedValueDisplay.textContent = this.value;
+            setMotorSpeed(this.value);
         });
+
+        function setMotorSpeed(speed) {
+            fetch(`https://api.particle.io/v1/devices/2b004f000e51353532343635
+/setSpeed?access_token=87455dc37bc39eeb81e8d1668d3534775a577583`, {
+                method: 'POST',
+                body: JSON.stringify({ args: speed }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        }
     </script>
 </body>
 </html>
