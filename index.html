@@ -1,27 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Fan Speed Control</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    #fan-speed-slider {
-      width: 300px;
-      height: 20px;
-      margin: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Speed Control</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        h1 { text-align: center; }
+        input[type="range"] { width: 100%; }
+    </style>
 </head>
 <body>
-  <h1>Fan Speed Control</h1>
-  <input type="range" id="fan-speed-slider" min="0" max="255" value="0" onchange="fanSpeedChanged(this.value)">
-  <script>
-    function fanSpeedChanged(value) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', '/fanSpeed?value=' + value, true);
-      xhr.send();
-    }
-  </script>
+    <div class="container">
+        <h1>Control PC Fan Speed</h1>
+        <input type="range" id="fanSpeed" min="0" max="100" value="0" />
+        <p>Fan Speed: <span id="speedValue">0</span>%</p>
+    </div>
+    <script>
+        const fanSpeedSlider = document.getElementById('fanSpeed');
+        const speedValueDisplay = document.getElementById('speedValue');
+
+        fanSpeedSlider.addEventListener('input', function() {
+            const speed = fanSpeedSlider.value;
+            speedValueDisplay.textContent = speed;
+            fetch(`https://api.particle.io/v1/devices/2b004f000e51353532343635/setFanSpeed?access_token=d1f1cb54f6e5f8efb7be56b84ac50ff3c690cce2&speed=${speed}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 </html>
